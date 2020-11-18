@@ -74,12 +74,12 @@ public class ImapClient {
     }
 
     private int getTestIdlePeriod() {
-        String period = System.getProperty("mail.idle.test.period");
+        String period = props.getProperty("mail.idle.test.period");
         return Objects.isNull(period) || period.isEmpty() ? 5000 : Integer.parseInt(period);
     }
 
     private int getTestIdleInitialDelay() {
-        String delay = System.getProperty("mail.idle.test.initialDelay");
+        String delay = props.getProperty("mail.idle.test.initialDelay");
         return Objects.isNull(delay) || delay.isEmpty() ? 0 : Integer.parseInt(delay);
     }
 
