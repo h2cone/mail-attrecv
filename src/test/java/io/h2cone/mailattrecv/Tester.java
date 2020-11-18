@@ -18,11 +18,10 @@ package io.h2cone.mailattrecv;
 
 import io.h2cone.mailattrecv.client.ImapClient;
 import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 
-import javax.mail.Address;
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.MessagingException;
+import javax.mail.*;
 import javax.mail.internet.MimeUtility;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,12 +30,21 @@ import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 public class Tester {
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     protected static final String PROPERTIES_APP = "app.properties";
 
     protected Folder openInbox() throws MessagingException, IOException {
         Properties props = loadProps();
         ImapClient client = new ImapClient(props);
-        Folder inbox = client.getInbox();
+        Folder inbox = null;
+        try {
+            inbox = client.getInbox();
+        } catch (Exception e) {
+            thrown.expect(AuthenticationFailedException.class);
+            throw e;
+        }
         Assert.assertNotNull(inbox);
         if (!inbox.isOpen()) {
             inbox.open(Folder.READ_ONLY);

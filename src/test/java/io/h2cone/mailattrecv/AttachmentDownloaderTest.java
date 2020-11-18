@@ -20,22 +20,35 @@ import io.h2cone.mailattrecv.download.AttachmentDownloader;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class AttachmentDownloaderTest extends Tester {
+    private final String msgNum = System.getenv("mail_msg_num");
 
     @Test
     public void download() throws IOException, MessagingException {
-        int msgNum = 121;
-        AttachmentDownloader downloader = new AttachmentDownloader(openInbox(), loadProps());
-        List<String> paths = downloader.download(msgNum);
+        Folder inbox = openInbox();
+        AttachmentDownloader downloader = new AttachmentDownloader(inbox, loadProps());
+        List<String> paths;
+        if (Objects.isNull(msgNum) || msgNum.isEmpty()) {
+            paths = downloader.download(inbox.getMessageCount());
+        } else {
+            paths = downloader.download(Integer.parseInt(msgNum));
+        }
         Assert.assertNotNull(paths);
+        List<File> files = new ArrayList<>();
         for (String path : paths) {
             File file = new File(path);
-            System.out.printf("path: %s, exited: %b", file.getPath(), file.exists());
+            System.out.printf("path: %s, exited: %b\n", file.getPath(), file.exists());
+            files.add(file);
         }
+        files.forEach(File::deleteOnExit);
+        System.out.println("delete all files after passing the test, number of files: " + files.size());
     }
 }
